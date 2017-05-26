@@ -624,7 +624,8 @@ def plotPsfSpatialModel(exposure, psf, psfCellSet, showBadCandidates=True, numSa
         keptPlots = True
 
 
-def showPsf(psf, eigenValues=None, XY=None, normalize=True, frame=None):
+def showPsf(psf, eigenValues=None, XY=None, normalize=True, frame=None, 
+            display="deferToFrame"):
     """Display a PSF's eigen images
 
     If normalize is True, set the largest absolute value of each eigenimage to 1.0 (n.b. sum == 0.0 for i > 0)
@@ -649,14 +650,14 @@ def showPsf(psf, eigenValues=None, XY=None, normalize=True, frame=None):
         else:
             mos.append(im)
 
-    mos.makeMosaic(frame=frame, title="Kernel Basis Functions")
+    mos.makeMosaic(frame=frame, title="Kernel Basis Functions", display=display)
 
     return mos
 
 
 def showPsfMosaic(exposure, psf=None, nx=7, ny=None,
                   showCenter=True, showEllipticity=False, showFwhm=False,
-                  stampSize=0, frame=None, title=None):
+                  stampSize=0, frame=None, title=None, display="deferToFrame"):
     """Show a mosaic of Psf images.  exposure may be an Exposure (optionally with PSF),
     or a tuple (width, height)
 
@@ -741,22 +742,23 @@ def showPsfMosaic(exposure, psf=None, nx=7, ny=None,
             shaper.measure(src, exp)
             shapes.append((src.getIxx(), src.getIxy(), src.getIyy()))
 
-    mos.makeMosaic(frame=frame, title=title if title else "Model Psf", mode=nx)
+    mos.makeMosaic(frame=frame, title=title if title else "Model Psf", mode=nx, display=display)
 
-    if centers and frame is not None:
-        with ds9.Buffering():
-            for i, (cen, shape) in enumerate(zip(centers, shapes)):
-                bbox = mos.getBBox(i)
-                xc, yc = cen[0] + bbox.getMinX(), cen[1] + bbox.getMinY()
-                if showCenter:
-                    ds9.dot("+", xc, yc, ctype=ds9.BLUE, frame=frame)
+    if display:
+        if centers and frame is not None:
+            with ds9.Buffering():
+                for i, (cen, shape) in enumerate(zip(centers, shapes)):
+                    bbox = mos.getBBox(i)
+                    xc, yc = cen[0] + bbox.getMinX(), cen[1] + bbox.getMinY()
+                    if showCenter:
+                        ds9.dot("+", xc, yc, ctype=ds9.BLUE, frame=frame)
 
-                if showEllipticity:
-                    ixx, ixy, iyy = shape
-                    ixx *= scale
-                    ixy *= scale
-                    iyy *= scale
-                    ds9.dot("@:%g,%g,%g" % (ixx, ixy, iyy), xc, yc, frame=frame, ctype=ds9.RED)
+                    if showEllipticity:
+                        ixx, ixy, iyy = shape
+                        ixx *= scale
+                        ixy *= scale
+                        iyy *= scale
+                        ds9.dot("@:%g,%g,%g" % (ixx, ixy, iyy), xc, yc, frame=frame, ctype=ds9.RED)
 
     return mos
 
