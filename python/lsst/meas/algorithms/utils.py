@@ -731,7 +731,7 @@ def showPsfMosaic(exposure, psf=None, nx=7, ny=None,
             centerX = im.getX0() + w//2
             centerY = im.getY0() + h//2
             src = table.makeRecord()
-            foot = afwDet.Footprint(exp.getBBox())
+            foot = afwDet.Footprint(afwGeom.SpanSet(exp.getBBox()))
             foot.addPeak(centerX, centerY, 1)
             src.setFootprint(foot)
 
